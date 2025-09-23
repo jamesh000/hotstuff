@@ -1,0 +1,24 @@
+syntax = "proto3";
+option go_package = "./";
+package hotstuff;
+
+message QuorumCertPayload {
+    bytes blockid = 1;
+}
+
+message QuorumCertProto {
+    bytes id = 1;
+	QuorumCertPayload payload = 2;
+}
+
+message BlockPayload {
+    bytes parent = 1;
+    string data = 2;
+    QuorumCertProto justify = 3;
+}
+
+message BlockProto {
+    bytes id = 1;
+    BlockPayload payload = 2;
+    uint64 height = 3;
+}

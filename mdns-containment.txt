@@ -1,0 +1,29 @@
+var PeerC chan peer.AddrInfo
+
+if *mdnsEnabled {
+		PeerC, err = initMdns(h, serviceName)
+		if err != nil {
+			panic(err)
+		}
+	}
+
+
+
+type discoveryNotifee struct {
+	PeerC chan peer.AddrInfo
+}
+
+func (n *discoveryNotifee) HandlePeerFound(pi peer.AddrInfo) {
+	n.PeerC <- pi
+}
+
+func initMdns(h host.Host, service string) (chan peer.AddrInfo, error) {
+	n := &discoveryNotifee{}
+	n.PeerC = make(chan peer.AddrInfo)
+
+	ser := mdns.NewMdnsService(h, service, n)
+	if err := ser.Start(); err != nil {
+		return nil, err
+	}
+	return n.PeerC, nil
+}
