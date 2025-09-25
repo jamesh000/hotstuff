@@ -1,7 +1,0 @@
-Things to do
-- Configure end to end encryption
-- Strict signing
-- Importing replica info
-- Quorum Certificates
-- Block Transfer
-- Pacemaker
