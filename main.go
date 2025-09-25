@@ -3,15 +3,12 @@ package main
 import (
 	"bufio"
 	"context"
-	"errors"
 	"flag"
 	"fmt"
 	"log"
 	"os"
 
-	"github.com/jamesh000/hotstuff/crypt"
 	"github.com/jamesh000/hotstuff/net"
-	"github.com/libp2p/go-libp2p/core/crypto"
 )
 
 func main() {
@@ -19,31 +16,45 @@ func main() {
 	defer cancel()
 
 	// arguments
+	// Network flags
 	//port := flag.Int("l", 0, "Port to listen on")
 	destFlag := flag.String("d", "", "Destination address")
-	rsaKeyFlag := flag.String("k", "rsa.key", "RSA key to use for libp2p")
+
+	// Local config flag
+	confFlag := flag.String("conf", "", "Config location")
+
+	// New local config flags
+	newConfFlag := flag.String("newconf", "", "file to generate new config in")
+	idFlag := flag.Int("id", 0, "Id of this node")
 	flag.Parse()
 
-	var priv crypto.PrivKey
-	if _, err := os.Stat(*rsaKeyFlag); errors.Is(err, os.ErrNotExist) {
-		log.Printf("Generating RSA private key at %q", *rsaKeyFlag)
-		priv, err := crypt.GenRSAKey()
-		if err != nil {
-			panic(err)
-		}
-
-		err = crypt.SaveRSAKey(*rsaKeyFlag, priv)
-		if err != nil {
-			panic(err)
-		}
-	} else {
-		priv, err = crypt.LoadRSAKey(*rsaKeyFlag)
-		if err != nil {
-			panic(err)
-		}
+	if (*confFlag == "" && *newConfFlag == "") || (*confFlag != "" && *newConfFlag != "") {
+		log.Println("Flag confusion, try again")
+		return
 	}
 
-	r, err := net.NewResonance(ctx, priv, 2, "synchronicity", "1.0")
+	var lcFile string
+
+	if *newConfFlag != "" {
+		err := NewLocalConf(*newConfFlag, *idFlag)
+		if err != nil {
+			panic(err)
+		}
+
+		log.Printf("Generated new config at %s", *newConfFlag)
+
+		lcFile = *newConfFlag
+	} else {
+		lcFile = *confFlag
+	}
+
+	lc, err := LoadLocalConf(lcFile)
+	if err != nil {
+		panic(err)
+	}
+	log.Printf("Loaded config from %s\n", lcFile)
+
+	r, err := net.NewResonance(ctx, lc.RsaKey, 2, "synchronicity", "1.0")
 	if err != nil {
 		panic(err)
 	}

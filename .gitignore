@@ -7,6 +7,7 @@
 *.dll
 *.so
 *.dylib
+hotstuff
 
 # Test binary, built with `go test -c`
 *.test
@@ -26,6 +27,10 @@ go.work.sum
 
 # env file
 .env
+
+# testing stuff
+testing/
+other/
 
 # Editor/IDE
 # .idea/
