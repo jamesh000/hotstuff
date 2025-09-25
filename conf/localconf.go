@@ -1,4 +1,4 @@
-package main
+package conf
 
 import (
 	"encoding/json"
@@ -6,6 +6,7 @@ import (
 
 	"github.com/jamesh000/hotstuff/crypt"
 	"github.com/libp2p/go-libp2p/core/crypto"
+	"github.com/libp2p/go-libp2p/core/peer"
 	blst "github.com/supranational/blst/bindings/go"
 )
 
@@ -15,13 +16,14 @@ const blsPkFile string = "bls-pk.key"
 const confFile string = "config.json"
 
 type LocalConf struct {
-	Id           int
+	Id           uint
 	RsaKey       crypto.PrivKey
 	consensusKey *blst.SecretKey
 }
 
 type lcText struct {
-	Id          int    `json:"id"`
+	Id          uint   `json:"id"`
+	PeerId      string `json:"peerid"`
 	RsaKey      string `json:"rsakey"`
 	ConsensusSk string `json:"consensuskey"`
 	ConsensusPk string `json:"consensuspub"`
@@ -58,7 +60,7 @@ func LoadLocalConf(confFile string) (*LocalConf, error) {
 	return lc, nil
 }
 
-func NewLocalConf(confFile string, id int) error {
+func NewLocalConf(confFile string, id uint) error {
 	var text lcText
 
 	// Make local text
@@ -69,6 +71,12 @@ func NewLocalConf(confFile string, id int) error {
 	if err != nil {
 		return err
 	}
+
+	pid, err := peer.IDFromPrivateKey(priv)
+	if err != nil {
+		return err
+	}
+	text.PeerId = pid.String()
 
 	text.RsaKey, err = crypt.Base64RSAKey(priv)
 	if err != nil {

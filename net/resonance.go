@@ -7,6 +7,7 @@ import (
 
 	kaddht "github.com/libp2p/go-libp2p-kad-dht"
 	pubsub "github.com/libp2p/go-libp2p-pubsub"
+	"github.com/libp2p/go-libp2p/core/connmgr"
 	"github.com/libp2p/go-libp2p/core/crypto"
 	"github.com/libp2p/go-libp2p/core/host"
 	"github.com/libp2p/go-libp2p/core/peer"
@@ -31,10 +32,10 @@ func (r Resonance) String() string {
 	return getHostAddress(r.H)
 }
 
-func NewResonance(ctx context.Context, id crypto.PrivKey, channelCount int, proto string, version string) (*Resonance, error) {
+func NewResonance(ctx context.Context, id crypto.PrivKey, c connmgr.ConnectionGater, channelCount int, proto string, version string) (*Resonance, error) {
 	r := new(Resonance)
 	var err error
-	r.H, r.dht, err = makeRoutedHost(ctx, 0, id)
+	r.H, r.dht, err = makeRoutedHost(ctx, 0, id, c)
 	if err != nil {
 		return nil, err
 	}
