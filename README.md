@@ -1,1 +1,1 @@
-The commit is a lie it's not working even a little bit
+The commit is kinda true it's beginning to work
